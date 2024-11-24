@@ -25,7 +25,7 @@ class DownloadBiLiBiLi:
         if not (url := url.split('?')[0]).endswith('/'):
             url += '/'
         self.url = url
-        with open(Path(__file__).with_name('./bilibili.txt')) as f:
+        with open(Path(__file__).with_name('bilibili.txt')) as f:
             cookie = f.read()
         self.headers = {
             'User-Agent': USER_AGENT,
@@ -34,10 +34,13 @@ class DownloadBiLiBiLi:
         }
 
     def run(self) -> None:
-        html = self._request_html()
-        self._extract_title_urls(html)
-        self.save_path.mkdir(parents=True, exist_ok=True)
-        run(self._download_merge())
+        try:
+            html = self._request_html()
+            self._extract_title_urls(html)
+            self.save_path.mkdir(parents=True, exist_ok=True)
+            run(self._download_merge())
+        except Exception as e:
+            print(e)
 
     def _request_html(self) -> str:
         response = get(self.url, headers=self.headers)
@@ -138,9 +141,9 @@ class DownloadBiLiBiLi:
     def _merge(self, video_path: Path, audio_path: Path, filepath: Path) -> None:
         with self._progress_object_merge() as progress:
             progress.add_task('正在合并音视频', total=None)
-            input_video = ffmpeg_input(video_path)
-            input_audio = ffmpeg_input(audio_path)
-            output = ffmpeg_output(input_video, input_audio, filepath, vcodec='copy', acodec='aac')
+            input_video = ffmpeg_input(str(video_path.absolute()))
+            input_audio = ffmpeg_input(str(audio_path.absolute()))
+            output = ffmpeg_output(input_video, input_audio, str(filepath.absolute()), vcodec='copy', acodec='aac')
             ffmpeg_run(output, quiet=True)
             print(f'[{GREEN}]{filepath} 合并完成')
             video_path.unlink()
@@ -173,7 +176,7 @@ if __name__ == '__main__':
     if mode != 'q':
         if mode == '2':
             cookie = Prompt.ask(f'\n[{CYAN}]请输入cookie').strip()
-            with open(Path(__file__).with_name('./bilibili.txt'), 'w') as f:
+            with open(Path(__file__).with_name('bilibili.txt'), 'w') as f:
                 f.write(cookie)
 
         while True:

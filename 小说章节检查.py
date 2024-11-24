@@ -51,8 +51,8 @@ class CheckFile:
         self._deal_info(title.rstrip('\n'), chapter_mark, counts, lines)
 
     def _modify_file(self) -> Literal['q'] | None:
-        modify = Prompt.ask(f'[{CYAN}]是否修改', choices=['\n', 'n', 'q'])
-        if modify == '\n':
+        modify = Prompt.ask(f'[{CYAN}]是否修改', default='y', choices=['y', 'n', 'q'])
+        if modify == 'y':
             self.filepath.write_text(''.join(self.content), encoding='utf-8')
         elif modify == 'q':
             return 'q'

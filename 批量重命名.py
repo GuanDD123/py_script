@@ -80,7 +80,7 @@ class RenameDouYin:
                 return
             self._show_result(filepaths, pattern)
             if filepaths:
-                if Prompt.ask(f'[{CYAN}]是否重命名', choices=['\n', 'n']) == '\n':
+                if Prompt.ask(f'[{CYAN}]是否重命名', default='y', choices=['y', 'n']) == 'y':
                     for filepath in filepaths:
                         old_filepath, new_filepath = filepath
                         old_filepath.rename(new_filepath)
@@ -134,22 +134,24 @@ if __name__ == '__main__':
 
     mode = Prompt.ask(f'[{CYAN}]{tips}', choices=['q', '1', '2', '3', '4'])
     if mode != 'q':
-        while True:
-            dirpath_str = Prompt.ask(f'\n[{CYAN}]请输入文件夹路径').strip()
-            if dirpath_str.lower() == 'q':
-                break
-            elif not dirpath_str:
-                continue
-            dirpath = Path(dirpath_str)
+        if mode == '4':
+            dirpath = Path(Prompt.ask(f'\n[{CYAN}]请输入文件夹路径', default='/home/sika/视频/douyin').strip())
+            for dirpath_child in dirpath.iterdir():
+                if dirpath_child.stem.startswith('UID'):
+                    if Prompt.ask(f'\n[{CYAN}]{dirpath_child.name}重命名？', default='y', choices=['y', 'n']) == 'y':
+                        RenameDouYin(dirpath_child).run()
+        else:
+            while True:
+                dirpath_str = Prompt.ask(f'\n[{CYAN}]请输入文件夹路径').strip()
+                if dirpath_str.lower() == 'q':
+                    break
+                elif not dirpath_str:
+                    continue
+                dirpath = Path(dirpath_str)
 
-            if mode == '1':
-                RenameRandom(dirpath, 9).run()
-            elif mode == '2':
-                RenameRandom(dirpath, 15).run()
-            elif mode == '3':
-                RenameDouYin(dirpath).run()
-            elif mode == '4':
-                for dirpath_child in dirpath.iterdir():
-                    if dirpath_child.stem.startswith('UID'):
-                        if Prompt.ask(f'\n[{CYAN}]{dirpath_child.name}重命名？', choices=['\n', 'n']) == '\n':
-                            RenameDouYin(dirpath_child).run()
+                if mode == '1':
+                    RenameRandom(dirpath, 9).run()
+                elif mode == '2':
+                    RenameRandom(dirpath, 15).run()
+                elif mode == '3':
+                    RenameDouYin(dirpath).run()
